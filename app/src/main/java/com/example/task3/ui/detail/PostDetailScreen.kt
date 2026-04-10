@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -120,7 +121,12 @@ private fun PostDetailContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            Card {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -145,7 +151,12 @@ private fun PostDetailContent(
             items = post.properties,
             key = { property -> property.label },
         ) { property ->
-            Card {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                ),
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
