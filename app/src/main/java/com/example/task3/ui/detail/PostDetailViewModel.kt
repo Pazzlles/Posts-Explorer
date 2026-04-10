@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.task3.data.CountryRepository
+import com.example.task3.data.PostRepository
 import com.example.task3.data.ServiceLocator
-import com.example.task3.data.model.CountryDetail
+import com.example.task3.data.model.PostDetail
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,45 +17,45 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-class CountryDetailViewModel(
-    private val countryCode: String,
-    private val repository: CountryRepository,
+class PostDetailViewModel(
+    private val postId: String,
+    private val repository: PostRepository,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(CountryDetailUiState(countryCode = countryCode))
-    val uiState: StateFlow<CountryDetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(PostDetailUiState(postId = postId))
+    val uiState: StateFlow<PostDetailUiState> = _uiState.asStateFlow()
 
     init {
-        loadCountry()
+        loadPost()
     }
 
-    fun onEvent(event: CountryDetailEvent) {
-        if (event is CountryDetailEvent.RetryClicked) {
-            loadCountry()
+    fun onEvent(event: PostDetailEvent) {
+        if (event is PostDetailEvent.RetryClicked) {
+            loadPost()
         }
     }
 
-    private fun loadCountry() {
+    private fun loadPost() {
         viewModelScope.launch {
             _uiState.update { currentState ->
-                currentState.copy(content = CountryDetailContentState.Loading)
+                currentState.copy(content = PostDetailContentState.Loading)
             }
 
             runCatching {
-                repository.getCountryDetail(countryCode)
-            }.onSuccess { country ->
+                repository.getPostDetail(postId)
+            }.onSuccess { post ->
                 _uiState.update { currentState ->
                     currentState.copy(
-                        title = "Post #${country.id}",
-                        content = CountryDetailContentState.Success(
-                            country = country.toUiModel(),
+                        title = "Post #${post.id}",
+                        content = PostDetailContentState.Success(
+                            post = post.toUiModel(),
                         ),
                     )
                 }
             }.onFailure { throwable ->
-                Log.e(TAG, "Failed to load country detail for code=$countryCode", throwable)
+                Log.e(TAG, "Failed to load post detail for id=$postId", throwable)
                 _uiState.update { currentState ->
                     currentState.copy(
-                        content = CountryDetailContentState.Error(
+                        content = PostDetailContentState.Error(
                             message = throwable.toUserMessage(),
                         ),
                     )
@@ -65,26 +65,26 @@ class CountryDetailViewModel(
     }
 
     companion object {
-        private const val TAG = "CountryDetailViewModel"
+        private const val TAG = "PostDetailViewModel"
 
-        fun factory(countryCode: String): ViewModelProvider.Factory = viewModelFactory {
+        fun factory(postId: String): ViewModelProvider.Factory = viewModelFactory {
             initializer {
-                CountryDetailViewModel(
-                    countryCode = countryCode,
-                    repository = ServiceLocator.countryRepository,
+                PostDetailViewModel(
+                    postId = postId,
+                    repository = ServiceLocator.postRepository,
                 )
             }
         }
     }
 }
 
-private fun CountryDetail.toUiModel(): CountryDetailBodyUiModel {
+private fun PostDetail.toUiModel(): PostDetailBodyUiModel {
     val properties = buildList {
-        add(CountryPropertyUiModel(label = "ID поста", value = id.toString()))
-        add(CountryPropertyUiModel(label = "ID автора", value = userId.toString()))
+        add(PostPropertyUiModel(label = "ID поста", value = id.toString()))
+        add(PostPropertyUiModel(label = "ID автора", value = userId.toString()))
     }
 
-    return CountryDetailBodyUiModel(
+    return PostDetailBodyUiModel(
         title = title,
         body = body,
         properties = properties,

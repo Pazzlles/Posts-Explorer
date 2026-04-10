@@ -1,6 +1,6 @@
 package com.example.task3.data
 
-import com.example.task3.data.remote.CountryApiService
+import com.example.task3.data.remote.PostApiService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -14,11 +14,11 @@ object ServiceLocator {
             .build()
     }
 
-    private val countryApiService: CountryApiService by lazy {
-        retrofit.create(CountryApiService::class.java)
+    private val postApiService: PostApiService by lazy {
+        retrofit.create(PostApiService::class.java)
     }
 
-    val countryRepository: CountryRepository by lazy {
-        CountryRepositoryImpl(countryApiService)
+    val postRepository: PostRepository by lazy {
+        PostRepositoryImpl(postApiService)
     }
 }

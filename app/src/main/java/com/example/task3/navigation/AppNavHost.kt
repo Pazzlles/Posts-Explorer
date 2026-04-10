@@ -7,18 +7,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.task3.ui.detail.CountryDetailContentState
-import com.example.task3.ui.detail.CountryDetailEvent
-import com.example.task3.ui.detail.CountryDetailRoute
-import com.example.task3.ui.detail.CountryDetailScreen
-import com.example.task3.ui.detail.CountryDetailUiState
-import com.example.task3.ui.list.CountriesRoute
+import com.example.task3.ui.detail.PostDetailContentState
+import com.example.task3.ui.detail.PostDetailEvent
+import com.example.task3.ui.detail.PostDetailRoute
+import com.example.task3.ui.detail.PostDetailScreen
+import com.example.task3.ui.detail.PostDetailUiState
+import com.example.task3.ui.list.PostListRoute
 
 private object Routes {
-    const val countries = "countries"
-    const val countryDetail = "country/{countryCode}"
+    const val posts = "posts"
+    const val postDetail = "post/{postId}"
 
-    fun countryDetail(countryCode: String): String = "country/$countryCode"
+    fun postDetail(postId: String): String = "post/$postId"
 }
 
 @Composable
@@ -27,44 +27,44 @@ fun AppNavHost(modifier: Modifier = Modifier) {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.countries,
+        startDestination = Routes.posts,
         modifier = modifier,
     ) {
-        composable(Routes.countries) {
-            CountriesRoute(
-                onOpenCountry = { countryCode ->
-                    navController.navigate(Routes.countryDetail(countryCode))
+        composable(Routes.posts) {
+            PostListRoute(
+                onOpenPost = { postId ->
+                    navController.navigate(Routes.postDetail(postId))
                 },
             )
         }
 
         composable(
-            route = Routes.countryDetail,
+            route = Routes.postDetail,
             arguments = listOf(
-                navArgument("countryCode") {
+                navArgument("postId") {
                     type = NavType.StringType
                 },
             ),
         ) { backStackEntry ->
-            val countryCode = backStackEntry.arguments?.getString("countryCode")
+            val postId = backStackEntry.arguments?.getString("postId")
 
-            if (countryCode.isNullOrBlank()) {
-                CountryDetailScreen(
-                    state = CountryDetailUiState(
-                        countryCode = "",
-                        content = CountryDetailContentState.Error(
+            if (postId.isNullOrBlank()) {
+                PostDetailScreen(
+                    state = PostDetailUiState(
+                        postId = "",
+                        content = PostDetailContentState.Error(
                             message = "Не удалось открыть экран: отсутствует id поста в маршруте.",
                         ),
                     ),
                     onEvent = { event ->
-                        if (event is CountryDetailEvent.BackClicked) {
+                        if (event is PostDetailEvent.BackClicked) {
                             navController.popBackStack()
                         }
                     },
                 )
             } else {
-                CountryDetailRoute(
-                    countryCode = countryCode,
+                PostDetailRoute(
+                    postId = postId,
                     onBack = { navController.popBackStack() },
                 )
             }

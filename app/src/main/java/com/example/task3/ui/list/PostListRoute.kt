@@ -7,19 +7,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun CountriesRoute(
-    onOpenCountry: (String) -> Unit,
+fun PostListRoute(
+    onOpenPost: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CountriesViewModel = viewModel(factory = CountriesViewModel.Factory),
+    viewModel: PostListViewModel = viewModel(factory = PostListViewModel.Factory),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    CountriesScreen(
+    PostListScreen(
         state = state,
         modifier = modifier,
         onEvent = { event ->
             when (event) {
-                is CountriesEvent.CountryClicked -> onOpenCountry(event.countryCode)
+                is PostListEvent.PostClicked -> onOpenPost(event.postId)
                 else -> viewModel.onEvent(event)
             }
         },

@@ -25,48 +25,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class CountryDetailUiState(
-    val countryCode: String,
+data class PostDetailUiState(
+    val postId: String,
     val title: String = "Детали поста",
-    val content: CountryDetailContentState = CountryDetailContentState.Loading,
+    val content: PostDetailContentState = PostDetailContentState.Loading,
 )
 
 @Immutable
-sealed interface CountryDetailContentState {
-    data object Loading : CountryDetailContentState
+sealed interface PostDetailContentState {
+    data object Loading : PostDetailContentState
 
     data class Error(
         val message: String,
-    ) : CountryDetailContentState
+    ) : PostDetailContentState
 
     data class Success(
-        val country: CountryDetailBodyUiModel,
-    ) : CountryDetailContentState
+        val post: PostDetailBodyUiModel,
+    ) : PostDetailContentState
 }
 
 @Immutable
-data class CountryDetailBodyUiModel(
+data class PostDetailBodyUiModel(
     val title: String,
     val body: String,
-    val properties: List<CountryPropertyUiModel>,
+    val properties: List<PostPropertyUiModel>,
 )
 
 @Immutable
-data class CountryPropertyUiModel(
+data class PostPropertyUiModel(
     val label: String,
     val value: String,
 )
 
-sealed interface CountryDetailEvent {
-    data object BackClicked : CountryDetailEvent
-    data object RetryClicked : CountryDetailEvent
+sealed interface PostDetailEvent {
+    data object BackClicked : PostDetailEvent
+    data object RetryClicked : PostDetailEvent
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountryDetailScreen(
-    state: CountryDetailUiState,
-    onEvent: (CountryDetailEvent) -> Unit,
+fun PostDetailScreen(
+    state: PostDetailUiState,
+    onEvent: (PostDetailEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -75,7 +75,7 @@ fun CountryDetailScreen(
             TopAppBar(
                 title = { Text(state.title) },
                 navigationIcon = {
-                    TextButton(onClick = { onEvent(CountryDetailEvent.BackClicked) }) {
+                    TextButton(onClick = { onEvent(PostDetailEvent.BackClicked) }) {
                         Text("Назад")
                     }
                 },
@@ -83,7 +83,7 @@ fun CountryDetailScreen(
         },
     ) { innerPadding ->
         when (val content = state.content) {
-            CountryDetailContentState.Loading -> {
+            PostDetailContentState.Loading -> {
                 DetailMessageState(
                     title = "Загрузка деталей...",
                     message = "Получаем информацию о выбранном посте.",
@@ -91,17 +91,17 @@ fun CountryDetailScreen(
                 )
             }
 
-            is CountryDetailContentState.Error -> {
+            is PostDetailContentState.Error -> {
                 DetailErrorState(
                     message = content.message,
-                    onRetry = { onEvent(CountryDetailEvent.RetryClicked) },
+                    onRetry = { onEvent(PostDetailEvent.RetryClicked) },
                     modifier = Modifier.padding(innerPadding),
                 )
             }
 
-            is CountryDetailContentState.Success -> {
-                CountryDetailContent(
-                    country = content.country,
+            is PostDetailContentState.Success -> {
+                PostDetailContent(
+                    post = content.post,
                     modifier = Modifier.padding(innerPadding),
                 )
             }
@@ -110,8 +110,8 @@ fun CountryDetailScreen(
 }
 
 @Composable
-private fun CountryDetailContent(
-    country: CountryDetailBodyUiModel,
+private fun PostDetailContent(
+    post: PostDetailBodyUiModel,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -128,12 +128,12 @@ private fun CountryDetailContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        text = country.title,
+                        text = post.title,
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                     )
                     Text(
-                        text = country.body,
+                        text = post.body,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -142,7 +142,7 @@ private fun CountryDetailContent(
         }
 
         items(
-            items = country.properties,
+            items = post.properties,
             key = { property -> property.label },
         ) { property ->
             Card {

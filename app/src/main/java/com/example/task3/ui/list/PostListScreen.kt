@@ -31,52 +31,52 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
 @Immutable
-data class CountriesUiState(
+data class PostListUiState(
     val title: String = "Posts Explorer",
     val searchQuery: String = "",
-    val content: CountriesContentState = CountriesContentState.Loading,
+    val content: PostListContentState = PostListContentState.Loading,
 )
 
 @Immutable
-sealed interface CountriesContentState {
-    data object Loading : CountriesContentState
+sealed interface PostListContentState {
+    data object Loading : PostListContentState
 
     data class Error(
         val message: String,
-    ) : CountriesContentState
+    ) : PostListContentState
 
     data class Empty(
         val title: String,
         val message: String,
-    ) : CountriesContentState
+    ) : PostListContentState
 
     data class Success(
         val summary: String,
-        val items: List<CountryCardUiModel>,
-    ) : CountriesContentState
+        val items: List<PostCardUiModel>,
+    ) : PostListContentState
 }
 
 @Immutable
-data class CountryCardUiModel(
+data class PostCardUiModel(
     val id: String,
     val title: String,
     val subtitle: String,
     val bodyPreview: String,
 )
 
-sealed interface CountriesEvent {
-    data class QueryChanged(val value: String) : CountriesEvent
-    data object SearchSubmitted : CountriesEvent
-    data object ClearSearchClicked : CountriesEvent
-    data object RetryClicked : CountriesEvent
-    data class CountryClicked(val countryCode: String) : CountriesEvent
+sealed interface PostListEvent {
+    data class QueryChanged(val value: String) : PostListEvent
+    data object SearchSubmitted : PostListEvent
+    data object ClearSearchClicked : PostListEvent
+    data object RetryClicked : PostListEvent
+    data class PostClicked(val postId: String) : PostListEvent
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CountriesScreen(
-    state: CountriesUiState,
-    onEvent: (CountriesEvent) -> Unit,
+fun PostListScreen(
+    state: PostListUiState,
+    onEvent: (PostListEvent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
@@ -96,14 +96,15 @@ fun CountriesScreen(
         ) {
             OutlinedTextField(
                 value = state.searchQuery,
-                onValueChange = { onEvent(CountriesEvent.QueryChanged(it)) },
+                onValueChange = { onEvent(PostListEvent.QueryChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 label = { Text("Фильтр по userId") },
+                placeholder = { Text("Введите userId (число от 1 до 10)") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        onEvent(CountriesEvent.SearchSubmitted)
+                        onEvent(PostListEvent.SearchSubmitted)
                     },
                 ),
             )
@@ -113,14 +114,14 @@ fun CountriesScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Button(
-                    onClick = { onEvent(CountriesEvent.SearchSubmitted) },
+                    onClick = { onEvent(PostListEvent.SearchSubmitted) },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text("Искать")
                 }
 
                 TextButton(
-                    onClick = { onEvent(CountriesEvent.ClearSearchClicked) },
+                    onClick = { onEvent(PostListEvent.ClearSearchClicked) },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text("Сбросить")
@@ -128,36 +129,36 @@ fun CountriesScreen(
             }
 
             when (val content = state.content) {
-                CountriesContentState.Loading -> {
-                    CountriesMessageState(
+                PostListContentState.Loading -> {
+                    PostListMessageState(
                         title = "Загрузка списка...",
                         message = "Получаем данные из JSONPlaceholder API.",
                         modifier = Modifier.weight(1f),
                     )
                 }
 
-                is CountriesContentState.Error -> {
-                    CountriesErrorState(
+                is PostListContentState.Error -> {
+                    PostListErrorState(
                         message = content.message,
-                        onRetry = { onEvent(CountriesEvent.RetryClicked) },
+                        onRetry = { onEvent(PostListEvent.RetryClicked) },
                         modifier = Modifier.weight(1f),
                     )
                 }
 
-                is CountriesContentState.Empty -> {
-                    CountriesMessageState(
+                is PostListContentState.Empty -> {
+                    PostListMessageState(
                         title = content.title,
                         message = content.message,
                         modifier = Modifier.weight(1f),
                     )
                 }
 
-                is CountriesContentState.Success -> {
-                    CountriesListContent(
+                is PostListContentState.Success -> {
+                    PostListContent(
                         summary = content.summary,
                         items = content.items,
-                        onCountryClick = { countryCode ->
-                            onEvent(CountriesEvent.CountryClicked(countryCode))
+                        onPostClick = { postId ->
+                            onEvent(PostListEvent.PostClicked(postId))
                         },
                         modifier = Modifier.weight(1f),
                     )
@@ -168,10 +169,10 @@ fun CountriesScreen(
 }
 
 @Composable
-private fun CountriesListContent(
+private fun PostListContent(
     summary: String,
-    items: List<CountryCardUiModel>,
-    onCountryClick: (String) -> Unit,
+    items: List<PostCardUiModel>,
+    onPostClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -194,7 +195,7 @@ private fun CountriesListContent(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onCountryClick(item.id) },
+                    .clickable { onPostClick(item.id) },
             ) {
                 Column(
                     modifier = Modifier
@@ -223,7 +224,7 @@ private fun CountriesListContent(
 }
 
 @Composable
-private fun CountriesMessageState(
+private fun PostListMessageState(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
@@ -250,7 +251,7 @@ private fun CountriesMessageState(
 }
 
 @Composable
-private fun CountriesErrorState(
+private fun PostListErrorState(
     message: String,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,

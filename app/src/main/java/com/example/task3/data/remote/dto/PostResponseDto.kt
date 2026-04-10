@@ -1,21 +1,21 @@
 package com.example.task3.data.remote.dto
 
-import com.example.task3.data.model.CountryDetail
-import com.example.task3.data.model.CountryListItem
+import com.example.task3.data.model.PostDetail
+import com.example.task3.data.model.PostListItem
 import com.google.gson.annotations.SerializedName
 
-data class CountryResponseDto(
+data class PostResponseDto(
     @SerializedName("userId") val userId: Int?,
     @SerializedName("id") val id: Int?,
     @SerializedName("title") val title: String?,
     @SerializedName("body") val body: String?,
 )
 
-fun CountryResponseDto.toCountryListItemOrNull(): CountryListItem? {
+fun PostResponseDto.toPostListItemOrNull(): PostListItem? {
     val postId = id ?: return null
     val ownerId = userId ?: return null
 
-    return CountryListItem(
+    return PostListItem(
         id = postId,
         userId = ownerId,
         title = title.orFallback("Без названия"),
@@ -26,8 +26,8 @@ fun CountryResponseDto.toCountryListItemOrNull(): CountryListItem? {
     )
 }
 
-fun CountryResponseDto.toCountryDetail(): CountryDetail {
-    return CountryDetail(
+fun PostResponseDto.toPostDetail(): PostDetail {
+    return PostDetail(
         id = id ?: 0,
         userId = userId ?: 0,
         title = title.orFallback("Без названия"),

@@ -7,23 +7,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun CountryDetailRoute(
-    countryCode: String,
+fun PostDetailRoute(
+    postId: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: CountryDetailViewModel = viewModel(
-        factory = CountryDetailViewModel.factory(countryCode),
+    viewModel: PostDetailViewModel = viewModel(
+        factory = PostDetailViewModel.factory(postId),
     ),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    CountryDetailScreen(
+    PostDetailScreen(
         state = state,
         modifier = modifier,
         onEvent = { event ->
             when (event) {
-                CountryDetailEvent.BackClicked -> onBack()
-                CountryDetailEvent.RetryClicked -> viewModel.onEvent(event)
+                PostDetailEvent.BackClicked -> onBack()
+                PostDetailEvent.RetryClicked -> viewModel.onEvent(event)
             }
         },
     )
