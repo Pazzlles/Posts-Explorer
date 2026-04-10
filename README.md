@@ -13,10 +13,10 @@
 Приложение показывает список постов, позволяет фильтровать их по 'userId', открывать детали выбранного поста и обрабатывает состояния 'Loading', 'Error', 'Success'.
 
 ## Скриншоты
-![Loading](https://raw.githubusercontent.com/Pazzlles/Posts-Explorer/dev/screenshots/loading.png)
+![Loading](screenshots/loading.png)
 
-![Error](https://raw.githubusercontent.com/Pazzlles/Posts-Explorer/dev/screenshots/error.png)
+![Error](screenshots/error.png)
 
-![List](https://raw.githubusercontent.com/Pazzlles/Posts-Explorer/dev/screenshots/list.png)
+![List](screenshots/list.png)
 
-![Detail](https://raw.githubusercontent.com/Pazzlles/Posts-Explorer/dev/screenshots/detail.png)
+![Detail](screenshots/detail.png)
