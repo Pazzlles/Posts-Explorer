@@ -27,9 +27,12 @@ fun PostResponseDto.toPostListItemOrNull(): PostListItem? {
 }
 
 fun PostResponseDto.toPostDetail(): PostDetail {
+    val postId = id ?: throw IllegalStateException("В ответе сервера отсутствует id поста.")
+    val ownerId = userId ?: throw IllegalStateException("В ответе сервера отсутствует userId поста.")
+
     return PostDetail(
-        id = id ?: 0,
-        userId = userId ?: 0,
+        id = postId,
+        userId = ownerId,
         title = title.orFallback("Без названия"),
         body = body.orFallback("Без описания"),
     )

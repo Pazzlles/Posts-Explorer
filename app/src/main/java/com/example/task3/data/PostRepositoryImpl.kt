@@ -14,9 +14,10 @@ class PostRepositoryImpl(
         val posts = if (query.isBlank()) {
             apiService.getAllPosts()
         } else {
-            query.trim().toIntOrNull()?.let { userId ->
-                apiService.getPostsByUserId(userId = userId)
-            }.orEmpty()
+            val userId = query.trim().toIntOrNull()
+                ?: throw IllegalArgumentException("Введите userId числом.")
+
+            apiService.getPostsByUserId(userId = userId)
         }
 
         return posts

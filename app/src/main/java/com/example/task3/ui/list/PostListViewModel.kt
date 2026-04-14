@@ -9,6 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.task3.data.PostRepository
 import com.example.task3.data.ServiceLocator
 import com.example.task3.data.model.PostListItem
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +26,8 @@ class PostListViewModel(
     val uiState: StateFlow<PostListUiState> = _uiState.asStateFlow()
 
     private var lastSubmittedQuery: String = ""
+    private var activeLoadJob: Job? = null
+    private var latestRequestId: Long = 0
 
     init {
         loadPosts(query = "")
@@ -40,18 +44,7 @@ class PostListViewModel(
             PostListEvent.SearchSubmitted -> {
                 val query = _uiState.value.searchQuery.trim()
                 lastSubmittedQuery = query
-                if (query.isNotBlank() && query.toIntOrNull() !in 1..10) {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            content = PostListContentState.Empty(
-                                title = "Некорректный фильтр",
-                                message = "Введите userId числом от 1 до 10.",
-                            ),
-                        )
-                    }
-                } else {
-                    loadPosts(query = query)
-                }
+                loadPosts(query = query)
             }
 
             PostListEvent.ClearSearchClicked -> {
@@ -63,18 +56,7 @@ class PostListViewModel(
             }
 
             PostListEvent.RetryClicked -> {
-                if (lastSubmittedQuery.isNotBlank() && lastSubmittedQuery.toIntOrNull() !in 1..10) {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            content = PostListContentState.Empty(
-                                title = "Некорректный фильтр",
-                                message = "Введите userId числом от 1 до 10.",
-                            ),
-                        )
-                    }
-                } else {
-                    loadPosts(query = lastSubmittedQuery)
-                }
+                loadPosts(query = lastSubmittedQuery)
             }
 
             is PostListEvent.PostClicked -> Unit
@@ -82,19 +64,27 @@ class PostListViewModel(
     }
 
     private fun loadPosts(query: String) {
-        viewModelScope.launch {
+        activeLoadJob?.cancel()
+        val requestId = ++latestRequestId
+
+        activeLoadJob = viewModelScope.launch {
             _uiState.update { currentState ->
                 currentState.copy(content = PostListContentState.Loading)
             }
 
-            runCatching {
-                repository.getPosts(query)
-            }.onSuccess { posts ->
+            try {
+                val posts = repository.getPosts(query)
+                if (requestId != latestRequestId) return@launch
+
                 _uiState.update { currentState ->
                     currentState.copy(content = posts.toContentState(query = query))
                 }
-            }.onFailure { throwable ->
-                Log.e(TAG, "Failed to load posts", throwable)
+            } catch (exception: CancellationException) {
+                throw exception
+            } catch (throwable: Throwable) {
+                if (requestId != latestRequestId) return@launch
+
+                Log.e(TAG, "Failed to load posts for query=$query", throwable)
                 _uiState.update { currentState ->
                     currentState.copy(
                         content = PostListContentState.Error(
@@ -151,6 +141,7 @@ private fun List<PostListItem>.toContentState(query: String): PostListContentSta
 private fun Throwable.toUserMessage(): String {
     return when (this) {
         is IOException -> "Проверьте подключение к интернету и попробуйте снова."
+        is IllegalArgumentException -> message ?: "Введите userId числом."
         is HttpException -> "Сервер вернул ошибку ${code()}."
         else -> message ?: "Не удалось загрузить список постов."
     }

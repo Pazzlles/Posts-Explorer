@@ -101,7 +101,7 @@ fun PostListScreen(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 label = { Text("Фильтр по userId") },
-                placeholder = { Text("Введите userId (число от 1 до 10)") },
+                placeholder = { Text("Введите userId числом, например 1") },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
                     onSearch = {
